@@ -7,6 +7,9 @@ import { z } from "zod";
 const server = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
+  BASIC_AUTH_USERNAME: z.string().min(1),
+  BASIC_AUTH_PASSWORD: z.string().min(1),
+  APP_URL: z.string().url(),
 });
 
 /**
@@ -26,6 +29,9 @@ const client = z.object({
 const processEnv = {
   DATABASE_URL: process.env.DATABASE_URL,
   NODE_ENV: process.env.NODE_ENV,
+  BASIC_AUTH_USERNAME: process.env.BASIC_AUTH_USERNAME,
+  BASIC_AUTH_PASSWORD: process.env.BASIC_AUTH_PASSWORD,
+  APP_URL: process.env.APP_URL,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
@@ -56,7 +62,7 @@ if (!skip) {
   if (parsed.success === false) {
     console.error(
       "❌ Invalid environment variables:",
-      parsed.error.flatten().fieldErrors,
+      parsed.error.flatten().fieldErrors
     );
     throw new Error("Invalid environment variables");
   }
@@ -70,7 +76,7 @@ if (!skip) {
         throw new Error(
           process.env.NODE_ENV === "production"
             ? "❌ Attempted to access a server-side environment variable on the client"
-            : `❌ Attempted to access server-side environment variable '${prop}' on the client`,
+            : `❌ Attempted to access server-side environment variable '${prop}' on the client`
         );
       return target[/** @type {keyof typeof target} */ (prop)];
     },

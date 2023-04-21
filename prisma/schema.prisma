@@ -15,6 +15,7 @@ model Short {
     slug      String   @unique
     target    String
     author    String?  @default("Anonymous")
+    isEnabled Boolean? @default(true)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
