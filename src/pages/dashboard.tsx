@@ -79,6 +79,7 @@ const Home: NextPage = () => {
     const target = e.currentTarget.target_url.value
 
     add({ slug, target, id: nanoid() })
+    e.currentTarget.reset()
   }
 
   const columns: GridColDef<Short>[] = [
