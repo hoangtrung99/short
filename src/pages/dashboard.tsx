@@ -2,13 +2,7 @@ import { type NextPage } from 'next'
 import Head from 'next/head'
 
 import { api } from '@/utils/api'
-import {
-  DataGrid,
-  GridCellEditStopParams,
-  GridCellEditStopReasons,
-  GridColDef,
-  MuiEvent,
-} from '@mui/x-data-grid'
+import { DataGrid, GridCellEditStopParams, GridColDef } from '@mui/x-data-grid'
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { Short } from '@prisma/client'
 import { nanoid } from 'nanoid'

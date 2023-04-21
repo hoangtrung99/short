@@ -31,7 +31,7 @@ export const shortRouter = createTRPCRouter({
       }),
     )
     .mutation(({ ctx, input }) => {
-      const { id, ...data } = input
+      const { id: _, ...data } = input
 
       return ctx.prisma.short.update({
         where: {
