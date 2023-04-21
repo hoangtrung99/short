@@ -8,7 +8,7 @@ export const shortRouter = createTRPCRouter({
   add: publicProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.string().optional(),
         slug: z.string().min(1).max(255),
         target: z.string().min(1).max(300),
         author: z.string().nullable().default('Anonymous'),
@@ -23,19 +23,21 @@ export const shortRouter = createTRPCRouter({
   update: publicProcedure
     .input(
       z.object({
-        id: z.string(),
-        slug: z.string().min(1).max(255).optional(),
+        id: z.string().optional(),
+        slug: z.string().min(1).max(255),
         target: z.string().min(1).max(300).optional(),
         author: z.string().nullable().optional(),
         isEnabled: z.boolean().nullable().optional(),
       }),
     )
     .mutation(({ ctx, input }) => {
+      const { id, ...data } = input
+
       return ctx.prisma.short.update({
         where: {
-          id: input.id,
+          slug: input.slug,
         },
-        data: input,
+        data,
       })
     }),
   delete: publicProcedure.input(z.object({ slug: z.string() })).mutation(({ ctx, input }) => {

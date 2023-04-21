@@ -2,13 +2,20 @@ import { type NextPage } from 'next'
 import Head from 'next/head'
 
 import { api } from '@/utils/api'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import {
+  DataGrid,
+  GridCellEditStopParams,
+  GridCellEditStopReasons,
+  GridColDef,
+  MuiEvent,
+} from '@mui/x-data-grid'
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { Short } from '@prisma/client'
 import { nanoid } from 'nanoid'
 import { env } from '@/env.mjs'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
+import Link from 'next/link'
 
 const Home: NextPage = () => {
   const { data: list } = api.short.list.useQuery(undefined, {
@@ -24,7 +31,8 @@ const Home: NextPage = () => {
 
       return { prevData }
     },
-    onError(err, newPost, ctx) {
+    onError(err, _, ctx) {
+      toast.error(err.message)
       utils.short.list.setData(undefined, ctx?.prevData)
     },
     onSettled() {
@@ -40,8 +48,31 @@ const Home: NextPage = () => {
 
       return { prevData }
     },
-    onError(err, newPost, ctx) {
+    onError(err, _, ctx) {
+      toast.error(err.message)
       utils.short.list.setData(undefined, ctx?.prevData)
+    },
+    onSettled() {
+      utils.short.list.invalidate()
+    },
+  })
+
+  const { mutate: update } = api.short.update.useMutation({
+    async onMutate(updatedShort) {
+      await utils.short.list.cancel()
+      const prevData = utils.short.list.getData()
+      utils.short.list.setData(undefined, (old = []) =>
+        old.map((s) => (s.slug === updatedShort.slug ? (updatedShort as Short) : s)),
+      )
+
+      return { prevData }
+    },
+    onError(err, _, ctx) {
+      utils.short.list.setData(undefined, ctx?.prevData)
+      toast.error(err.message)
+    },
+    onSuccess() {
+      toast.success('Updated')
     },
     onSettled() {
       utils.short.list.invalidate()
@@ -61,7 +92,6 @@ const Home: NextPage = () => {
       field: 'slug',
       headerName: 'Slug',
       width: 150,
-      editable: true,
     },
     {
       field: 'target',
@@ -106,20 +136,31 @@ const Home: NextPage = () => {
     },
   ]
 
+  const handleEditCell = (params: GridCellEditStopParams) => {
+    if (params.row.target === list[params.row.id]?.target) return
+    update({ target: params.row.target, slug: params.row.slug, id: params.row.id })
+  }
+
   return (
     <>
       <Head>
         <title>Short</title>
       </Head>
 
-      <Box component="form" onSubmit={onSubmit}>
-        <Stack direction="row">
-          <TextField required id="slug" label="Slug" variant="filled" />
-          <TextField required id="target_url" label="Target URL" variant="filled" />
-          <Button type="submit">Add</Button>
+      <Box>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="row" component="form" onSubmit={onSubmit}>
+            <TextField required id="slug" label="Slug" variant="filled" />
+            <TextField required id="target_url" label="Target URL" variant="filled" />
+            <Button type="submit">Add</Button>
+          </Stack>
+
+          <Button>
+            <Link href="/api/playground"> API PLAYGROUND</Link>
+          </Button>
         </Stack>
 
-        <DataGrid columns={columns} rows={list} />
+        <DataGrid columns={columns} rows={list} onCellEditStop={handleEditCell} />
       </Box>
     </>
   )
