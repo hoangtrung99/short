@@ -1,11 +1,18 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from '@/server/db'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { slug } = req.query;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { slug } = req.query
 
-  res
-    .status(301)
-    .redirect(
-      "https://expo.dev/accounts/solashi/projects/neknote-dev/builds/bf9f62cc-e4f7-4938-ad62-ac55e77ce51f"
-    );
+  if (!slug) return res.status(404).send('Not found.')
+
+  const short = await prisma.short.findFirst({
+    where: {
+      slug: slug as string,
+    },
+  })
+
+  if (!short) return res.status(404).send('Not found.')
+
+  res.status(301).redirect(short.target)
 }

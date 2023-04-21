@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Short {
-    id        String   @id @default(cuid())
+    id        String   @id @default(nanoid())
     slug      String   @unique
     target    String
     author    String?  @default("Anonymous")
