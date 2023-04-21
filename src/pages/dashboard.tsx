@@ -132,7 +132,8 @@ const Home: NextPage = () => {
   ]
 
   const handleEditCell = (params: GridCellEditStopParams) => {
-    if (params.row.target === list[params.row.id]?.target) return
+    const old = list.find((s) => s.id === params.row.id)
+    if (params.row.target === old?.target) return
     update({ target: params.row.target, slug: params.row.slug, id: params.row.id })
   }
 
